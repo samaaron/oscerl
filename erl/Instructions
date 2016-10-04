@@ -1,0 +1,38 @@
+Unpack into some directory <dir>
+
+In a new terminal
+
+$ cd <dir>
+$ make
+
+This starts the UDP timer server
+
+In Sonic Pi make three buffers
+
+Buffer 0
+
+Buffer0
+defonce :osc_sender do
+  OSC::UDPClient.new("localhost", 8014)
+end
+
+Buffer 1
+
+live_loop :foo do
+  info = sync "/play123"
+  play 80
+end
+
+Buffer 2
+
+osc_sender.send_ts(Time.now+1, "/play123")
+osc_sender.send_ts(Time.now+1.1, "/play123")
+osc_sender.send_ts(Time.now+1.2, "/play123")
+osc_sender.send_ts(Time.now+1.3, "/play123")
+
+Click on Buffer 0 to start a IUDP sender
+Click on Buffer 1 to start a cue listener
+Click on Buffer 2 to schedule some events
+
+
+
