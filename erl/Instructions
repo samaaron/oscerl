@@ -1,38 +1,33 @@
-Unpack into some directory <dir>
+1) Start SP
 
-In a new terminal
+2) Put this code into buffer 0 and hit Run
 
-$ cd <dir>
-$ make
-
-This starts the UDP timer server
-
-In Sonic Pi make three buffers
-
-Buffer 0
-
-Buffer0
 defonce :osc_sender do
   OSC::UDPClient.new("localhost", 8014)
 end
 
-Buffer 1
-
-live_loop :foo do
-  info = sync "/play123"
-  play 80
+live_loop :load_code do
+  res = sync "/load_buffer"
+  idx = res[:args][0]
+  content = res[:args][1]
+  puts "loading buffer",idx
+  __replace_buffer_idx(idx, content)
 end
 
-Buffer 2
+live_loop :run_buffer do
+  res = sync "/run_buffer"
+  idx = res[:args][0]
+  puts "running buffer", idx
+  __run_buffer_idx(idx)
+end
 
-osc_sender.send_ts(Time.now+1, "/play123")
-osc_sender.send_ts(Time.now+1.1, "/play123")
-osc_sender.send_ts(Time.now+1.2, "/play123")
-osc_sender.send_ts(Time.now+1.3, "/play123")
+3) start a new shell
 
-Click on Buffer 0 to start a IUDP sender
-Click on Buffer 1 to start a cue listener
-Click on Buffer 2 to schedule some events
+  $ cd erl
+  Make
 
+This will load some code into SP buffers 2 and 3
 
+Hit run in buffer 3 and you might hear some "music"
 
+4) The erlang midi interface works on the mac only
