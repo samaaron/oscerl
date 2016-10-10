@@ -27,16 +27,21 @@ play_note(I) ->
     midi_out_driver:send_midi([144,I,0]).
 
 start(Type) ->
-    Exec = driver(Type),
-    Prog = filename:dirname(code:which(?MODULE)) ++ Exec,
-    register(?MODULE, 
-	     spawn(fun() ->
-			   process_flag(trap_exit, true),
-			   Port = open_port({spawn, Prog},
-					    [{packet, 2}]),
-		     loop(Port)
-		   end)),
-    sleep(1500).  %% why since drivers takes a while to start
+    case whereis(?MODULE) of
+	undefined ->
+	    Exec = driver(Type),
+	    Prog = filename:dirname(code:which(?MODULE)) ++ Exec,
+	    register(?MODULE, 
+		     spawn(fun() ->
+				   process_flag(trap_exit, true),
+				   Port = open_port({spawn, Prog},
+						    [{packet, 2}]),
+				   loop(Port)
+			   end)),
+	    sleep(1500);  %% why since drivers takes a while to start
+	_Pid ->
+	    alread_started
+    end.
 
 driver(internal) -> "/midi_synt_driver";
 driver(external) -> "/midi_event_gen".

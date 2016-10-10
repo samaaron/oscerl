@@ -1,0 +1,85 @@
+1) The Sonic Pi is configured to receive
+   OSC commands on port 4559
+
+2) We setup an OSC responder with code like this:
+   
+  live_loop :rcv do
+    cmd = sync "/play/note"
+    note = cmd[:args][0]
+    play note
+  end
+
+  Now if we send the OSC command ["/play/note", 60]
+
+  Sonic Pi will play note 60 (Middle C)
+
+3) Erlang can send a note with code like this
+
+play_note_now(Note) ->
+    Cmd = ["/play/note", Note],
+    E = osc:encode(Cmd),
+    {ok, Socket} = gen_udp:open(0,[binary]),
+    ok = gen_udp:send(Socket, "localhost", 4559, E),
+    gen_udp:close(Socket).
+
+4) To run this do the following (in an erlang shell)
+
+   $ erl
+   1> test_sp_interface:send_note_now(60)
+
+5) To send a note in the future we might define
+
+   play_note_in_future(Note, Delta) ->
+       spawn(fun() ->
+ 		  sleep(Delta),
+		  play_note_now(Note)
+  	     end).
+
+   Which is the same as play_note_now(Note) after a delay of Delta milliseconds
+
+   So
+
+   > test_sp_interface:play_not_in_futur(60, 1200)
+
+   Plays a middle C in 1200 millisconds from now
+
+6) Setting up an erlang udp agent.
+
+   This listens on port 8014
+
+   In Sonic Pi we do this:
+
+   defonce :osc_sender do
+     OSC::UDPClient.new("localhost", 8014)
+   end
+
+and in Erlang
+
+   udp_server:start()
+
+7) Protocol
+
+   The Erlang server understands the following command
+
+   ["/send_after", TnowSeconds, TNowNanoSeconds, DelayMs, Host, Port, Cmd, ...]
+
+   So for example to send a "/play/note", 60 command in 1100 millisconds
+   we write:
+
+  t = Time.now
+  osc_sender.send "/send_after",
+                  t.to_i, t.nsec, 1100, "localhost", 4559, "/play/note", 60
+
+  Cmd can be anything you like (one of more OSC objects)
+
+  So for example
+
+  osc_sender.send "/send_after",
+                  t.to_i, t.nsec, N, "localhost", 4559, "/foo/bar", "hello", 23, 49
+
+  will send the OSC command
+
+   ["/foo/bar", "hello", 23, 49] after N millisconds
+
+
+

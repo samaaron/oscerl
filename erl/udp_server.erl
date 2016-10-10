@@ -68,16 +68,27 @@ loop(Socket, N, Monitor) ->
 	    loop(Socket, N+1, Monitor)
     end.
 
+
+do_cmd(Socket, ["/send_after", Tsec, Tnano, When, Host, Port | Cmd] = X) ->
+    Tnow = time_now(),
+    SonicTnow = Tsec + Tnano/1000000000,
+    PropagationDelay = Tnow - SonicTnow,
+    io:format("~nTnow       = ~p~nSonic Tnow = ~p~nDelay      = ~p (ms)~n",
+	      [Tnow, SonicTnow, PropagationDelay*1000]),
+    B = osc:encode(Cmd),
+    Delay = trunc(When  - PropagationDelay),
+    io:format("Delay=~p~n",[Delay]),
+    send_after(Socket, Host, Port, Delay, B);
 do_cmd(Socket, ["/send_at", Time, Host, Port | Cmd] = X) ->
-    io:format("do:~p (Now=~p) (sys=~p)~n",[X, the_time(), erlang:system_time()]),
+    io:format("do:~p (Now=~p) (sys=~p)~n",[X, time_now(), erlang:system_time()]),
     Now = erlang:convert_time_unit(erlang:system_time(),native,seconds),
     io:format("Now=~p~n",[Now]),
     B = osc:encode(Cmd),
-    Delay = Time - the_time(),
+    Delay = Time - time_now(),
     io:format("Delay=~p~n",[Delay]),
     send_after(Socket, Host, Port, Delay, B);
 do_cmd(Socket, ["/after1",TInt,TNano,DelayMs,Host,Port|Cmd]=Msg) ->
-    Tme = the_time(),
+    Tme = time_now(),
     F = TNano/1000000000,
     Tpi = TInt + F,
     Delay = Tme - Tpi,
@@ -93,6 +104,13 @@ do_cmd(Socket, ["/play_tune",Host,Port]) ->
 do_cmd(_Socket, Cmd) ->
     io:format("Cannot do:~p~n",[Cmd]).
 
+
+%% time_now() returns time past epoch as a float
+%% should be same as Sonic Pi's Time.now
+time_now() ->
+    erlang:system_time() / 1000000000.
+
+
 play([{sleep,Time}|T], Socket, Host, Port) ->
     T1 = trunc(Time/256)*1000,
     receive
@@ -107,12 +125,9 @@ play([], _, _, _) ->
     void.
 
 print_times(T) ->
-    T1 = the_time(),
+    T1 = time_now(),
     Delay = T1 - T,
     io:format("Bundle time   = ~p~nReceived time = ~p~n(delay:~p)~n",[T, T1, Delay]).
-
-the_time() ->
-    erlang:system_time() / 1000000000.
 
 print_bundle(N, [{_Len,B}|T]) ->
     io:format("packet:~p content:~p~n",[N,catch osc:decode(B)]),

@@ -23,16 +23,31 @@ test_seq() ->
     case maps:find(<<"Piano">>, Map) of
 	{ok, #{data := L1}} ->
 	    elib2_misc:dump("note_list.tmp", L1),
-	    play_seq(L1);
+	    play_scaled_seq(2.8, L1);
 	error ->
 	    void
     end.
+
+test_seq1() ->
+    io:format("sequential rendering engine - rach~n"),  
+    midi_out_driver:start(internal),
+    L = midi_parser:parse_file("../midi_files/rach-pc1-1.mid"),
+    %% elib2_misc:dump("midi.tmp", L),
+    %% Map = add_tracknames(L),
+    %% elib2_misc:dump("note_list.tmp", L),
+    %% Ignore the tempo map
+    #{data := L1} = lists:nth(3, L),
+    play_scaled_seq(2.8, L1).
+
+play_scaled_seq(Scale, L) ->
+    L1 = [{trunc(I*Scale),J} || {I,J} <- L],
+    play_seq(L).
 
 play_seq([{0,D}|T]) ->
     midi:send(D),
     play_seq(T);
 play_seq([{Dt,D}|T]) ->
-    delay(trunc(Dt*2.8)),
+    delay(Dt),
     midi:send(D),
     play_seq(T);
 play_seq([]) ->
@@ -110,6 +125,7 @@ transcribe(Map, Key) ->
 
 add_tracknames(L) ->
     Names = [track_names(I) || I<- L],
+    io:format("Tracknames=~p~n",[Names]),
     L1 = lists:zip(Names, L),
     maps:from_list(L1).
 

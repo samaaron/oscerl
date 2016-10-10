@@ -1,10 +1,10 @@
 -module(midi_parser).
 -compile(export_all).
 
-info() -> info("rach-pc1-1.mid").
+info() -> info("../midi_files/rach-pc1-1.mid").
 
 test() ->
-    E = parse_file("jerusalem.mid"),
+    E = parse_file("../midi_files/jerusalem.mid"),
     E.
 
 parse_file(F) ->
