@@ -30,7 +30,8 @@ midi_event_gen: midi_event_gen.c erl_comm.c
 midi_synt_driver: midi_synt_driver.c erl_comm.c
 	gcc -o midi_synt_driver midi_synt_driver.c erl_comm.c \
                -framework CoreMidi -framework CoreServices \
-               -framework AudioToolbox
+               -framework AudioToolbox -framework CoreAudio -framework AudioUnit 
+
 
 beams: ${MODS:%.erl=%.beam}
 
