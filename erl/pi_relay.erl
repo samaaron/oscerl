@@ -42,7 +42,7 @@ relay(Tag, FromPort, ToPort) ->
 loop(Tag, Socket, N, ToPort) ->
     receive
 	{udp, Socket, _Ip, _Port, Bin} ->
-	    gen_udp:send(Socket,"localhist", ToPort, Bin),
+	    ok = gen_udp:send(Socket,"locahost", ToPort, Bin),
 	    Decoded = (catch osc:decode(Bin)),
 	    io:format("~p ~p~n",[Tag,Decoded]),
 	    loop(Tag, Socket, N+1, ToPort);
