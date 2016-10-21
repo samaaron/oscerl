@@ -1,0 +1,72 @@
+1) There is some notion of "logical clock" (LC) this
+   is set to zero when you start a progam.
+
+   I'll assume you read the system clock at the time when you
+   set LC = 0 - and put the value in a variable Time_base
+
+   Timebase = <value of system clock when LC=0>
+
+2) a command like sleep(10) increments LC
+
+    LC = LC+10
+
+   If you want to *schedule* a command at logical time "50"
+   then you ask the system to schedule this at time
+   Timebase + 50
+
+3) The "schedule time" in a bundle is Timebase + LogicalTime
+
+Now lets assume there are two systems A and B
+
+A is the "master"
+
+    a) A starts a progam and sets
+        LC=0
+        Assume that TimeBase(A) = 120
+
+    b) A sends a message to B
+       "/clock/zero" 120
+        This means "my LC is zero at mytime of 120"
+
+    c) B receives this message at some time in the future
+       B has a badly set clock - when B receives the message it
+       reads the local clock and sets a couple of variables
+       (assume that when the local time on A was 120, it was 85 on B)
+
+       When B receives the "/clock/zero" message it reads it's local clock
+       (which is 85) and sets a couple of variables
+
+       MyTimeBase = 85
+       RemoteTimeBase = 120
+
+    d) On A we want to schdule an event at logical time LC=20
+       B sends a bundle to A
+
+       <120+20> Cmd   (ie at the time TimeBase + 20)
+
+    e) B receives the bundle
+
+      <140> Cmd
+
+      B knows that A's TimeBase was 120 so it so the delay
+      is 140-RemoteTimeBase = 20
+
+      B schedules the event at time MyTimeBase + 20 = 105
+
+
+Summary: When you zero your logical clock you send me a message
+
+      "/local/clock/set/zero" <MyLocalTime>
+
+I interpret all bundle times as "relative the last time you sent 
+me this command.
+
+You need to send me your local time at full 64 bit precision
+as we discussed earlier OR (better) add the OSC tag "t" to the set
+of encodable messages
+
+
+
+
+        
+       
