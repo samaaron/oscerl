@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+    <title>Sonic Pi Remote</title>
+    <script src="./jlib.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link rel="stylesheet" href="./w3.css"/>
+  <style>
+    body { margin-left:100px; width:70%}
+  </style>
+      
+  <body>
+    <header class="w3-container w3-teal">
+      <h1>Pi Remote</h1>
+    </header>
+
+    <div class="w3-container">
+
+      <p>Use this interface to send remote commands to the sonic PI</p>
+      <p>Sam will tell you what to do</p>
+      <p>Styled with <a href="http://www.w3schools.com/w3css/">w3css</a></p>
+  
+      <form class="w3-container">
+	<label class="w3-label w3-text-teal"><b>IP address of server</b></label>
+    <input id="ip" class="w3-input w3-border w3-light-grey"
+value = "localhost"
+     type="text"/>
+
+	<label class="w3-label w3-text-teal"><b>Code</b></label>
+	<textarea id="program" class="w3-x-large w3-input w3-border" rows="10" >play 80;
+sleep 1;
+play 82;
+	</textarea>
+      </form>
+      
+      <div class="w3-container">
+	<button onclick="send_pi();" class="w3-btn w3-round-large w3-purple">Run</button>
+      </div>
+      
+    </div>
+  </body>
+  <script>
+
+function send_pi(){
+    console.log('send');
+    var ip = document.getElementById("ip").value;
+    var prog = document.getElementById("program").value;
+    console.log('ip', [ip,prog]);
+    var nop = function(x){
+        console.log('return',x);
+        return true};
+    json_rpc("pi_http_server", "play_remote", [ip,prog], nop);
+}  
+
+</script>
+
+</html>
