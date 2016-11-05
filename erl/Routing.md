@@ -2,18 +2,18 @@
 
 The Erlang OSC router-scheduler needs to be able to handle the following scenarios:
 
-1) A well-defined Sonic Pi specific timestamped bundle on port A
-2) Arbitrary OSC messages from unknown sources on port B
+1. A well-defined Sonic Pi specific timestamped bundle on port A
+2. Arbitrary OSC messages from unknown sources on port B
 
 
 ## Well defined SP bundles
 
 We define a SP bundle to have the following attributes:
 
-1) Received on port A
-2) A standard bundle timestamp
-3) An 'action' OSC packet
-4) One or more optional payload OSC packets
+1. Received on port A
+2. A standard bundle timestamp
+3. An 'action' OSC packet
+4. One or more optional payload OSC packets
 
 ### Bundle timestamp
 
