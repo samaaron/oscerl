@@ -43,7 +43,7 @@ These are either a standard OSC packet or a number of OSC packets. This
 need not be unpacked, but should be treated as opaque binary blobs.
 
 
-## Aribrary OSC messages
+## Arbitrary OSC messages
 
 It should be possible to dynamically define regexp-like pattern matchers which
 operate on OSC messages received on port B. For example:
