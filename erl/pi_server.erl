@@ -63,6 +63,7 @@ do_bundle(Socket, Time, [{_,B}], Clock) ->
     case Cmd of
 	["/send_after",Host,Port|Cmd1] ->
 	    spawn(fun() ->
+                          io:format("bundle cmd1:~p~n",[Cmd1]),
 			  send_later(Time, Clock, Socket, Host, Port, Cmd1)
 		  end);
 	_ ->
@@ -70,14 +71,28 @@ do_bundle(Socket, Time, [{_,B}], Clock) ->
     end.
 
 send_later(BundleTime, {Tremote,Tlocal}, Socket, Host, Port, Cmd) ->
+    io:format(Cmd),
+
+io:format("yo"),
+io:format("----"),
     Bin = osc:encode(Cmd),
-    RemoteDelay = BundleTime - Tremote,
-    LocalAbsTime = Tlocal + RemoteDelay,
-    RealDelay = LocalAbsTime - osc:now(),    
+    %% RemoteDelay = BundleTime - Tremote,
+    %% LocalAbsTime = Tlocal + RemoteDelay,
+    RealDelay = BundleTime - osc:now(),
     MsDelay = trunc(RealDelay*1000+0.5), %% nearest
     sleep(MsDelay),
     ok = gen_udp:send(Socket, Host, Port, Bin),
     io:format("Sending to ~p:~p => ~p~n",[Host, Port, Cmd]).
+
+%% send_later(BundleTime, {Tremote,Tlocal}, Socket, Host, Port, Cmd) ->
+%%     Bin = osc:encode(Cmd),
+%%     RemoteDelay = BundleTime - Tremote,
+%%     LocalAbsTime = Tlocal + RemoteDelay,
+%%     RealDelay = LocalAbsTime - osc:now(),
+%%     MsDelay = trunc(RealDelay*1000+0.5), %% nearest
+%%     sleep(MsDelay),
+%%     ok = gen_udp:send(Socket, Host, Port, Bin),
+%%     io:format("Sending to ~p:~p => ~p~n",[Host, Port, Cmd]).
 
 sleep(T) ->
     receive
@@ -88,4 +103,3 @@ sleep(T) ->
 
 do_cmd(_Socket, _Clock, Cmd) ->
     io:format("Cannot do:~p~n",[Cmd]).
-

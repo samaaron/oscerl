@@ -1,20 +1,21 @@
-.SUFFIXES: .erl .beam 
+.SUFFIXES: .erl .beam
 
 MODS := $(wildcard *.erl)
 
 %.beam: %.erl
 	erlc -W $<
 
+
 remote: beams
 	erl -pa ./drivers -s pi_http_server start
 
-all: beams 
-	erl -s udp_server start
+all: beams
+	erl -s pi_server start
 
 key25: beams
 	erl -pa ./drivers -s midi_key25 start
 
-relay: beams 
+relay: beams
 	erl -s pi_relay start
 
 
@@ -47,13 +48,13 @@ demo_par3: beams
 	erl -pa drivers -s midi_experiments demo_par2
 
 par3a: beams
-	erl -pa drivers -s midi_experiments2 test_par3	
+	erl -pa drivers -s midi_experiments2 test_par3
 
 par3b: beams
-	erl -pa drivers -s midi_experiments3 test_par3	
+	erl -pa drivers -s midi_experiments3 test_par3
 
 par3c: beams
-	erl +K true -pa drivers -s midi_experiments test_par3	
+	erl +K true -pa drivers -s midi_experiments test_par3
 
 clip_player: beams
 	erl -pa drivers -s midi_clip run
@@ -62,8 +63,3 @@ beams: ${MODS:%.erl=%.beam}
 
 clean:
 	rm -rf *.beam
-
-
-
-
-

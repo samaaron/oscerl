@@ -34,6 +34,9 @@ test2() ->
 	    ["/forward", "localhost", 6000, "/sendmidi", 12, 34, 56]).
 
 encode([Verb|Args]) ->
+io:format(Verb),
+io:format(Args),
+io:format("===="),
     Str   = encode_string(Verb),
     Flags = encode_flags(Args),
     Data  = [encode_arg(I) || I <- Args],
@@ -64,7 +67,7 @@ encode_arg(X) when is_list(X)    -> encode_string(X);
 encode_arg(X) when is_atom(X)    -> encode_string(atom_to_list(X));
 encode_arg(X) when is_integer(X) -> <<X:32>>;
 encode_arg(X) when is_float(X)   -> <<X:32/float>>; %
-encode_arg({int64,X})            -> <<X:64/unsigned-little-integer>>. 
+encode_arg({int64,X})            -> <<X:64/unsigned-little-integer>>.
 
 %% bundles
 
@@ -85,7 +88,7 @@ pack_ts(Time, Data) ->
 %5 Decoding
 %%----------------------------------------------------------------------
 
-decode(B0) when is_binary(B0) ->    
+decode(B0) when is_binary(B0) ->
     {Verb,  B1}      = get_string(B0),
     %% io:format("Verb: ~p~n",[Verb]),
     case Verb of
@@ -101,7 +104,7 @@ decode(B0) when is_binary(B0) ->
 -define(EPOCH,	  	2208988800).		% offset yr 1900 to unix epoch
 
 now() ->
-    %% seconds past epoc 
+    %% seconds past epoc
     erlang:system_time()/1000000000.
 
 encode_time(Time) ->
@@ -110,7 +113,7 @@ encode_time(Time) ->
     F = T1 - IntPart,
     FracPart = trunc(F * (2 bsl 31)),
     <<IntPart:32, FracPart:32/unsigned-big-integer>>.
-	
+
 decode_time(<<X:32,Y:32/unsigned-big-integer>>) ->
     X - ?EPOCH + binfrac(Y).
 
@@ -119,8 +122,8 @@ decode_time(<<X:32,Y:32/unsigned-big-integer>>) ->
 %% binfrac(Bin, N, Frac) -> binfrac(Bin bsr 1, N*2, Frac + (Bin band 1)/N).
 
 binfrac(I) -> I / (2 bsl 31).
-    
-    
+
+
 decode_bundle(<<Size:32,B:Size/binary,B1/binary>>) ->
     [{Size, B}|decode_bundle(B1)];
 decode_bundle(<<>>) ->
@@ -140,8 +143,8 @@ get_args([$s|T1], B0, L) ->
     get_args(T1, B1, [Str|L]);
 get_args([], _, L) ->
     lists:reverse(L).
-    
-get_string(X) when is_binary(X) -> 
+
+get_string(X) when is_binary(X) ->
     [Bin,After] = binary:split(X, <<0>>),
     %% skip to bounday
     K = 3 - (size(Bin) rem 4),
